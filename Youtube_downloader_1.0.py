@@ -10,6 +10,15 @@ download_dir = './Downloads/'
 file_dir = os.path.realpath(__file__)[:-len(os.path.basename(__file__))][:-1]
 
 #ask for the link from the user
+def setup():
+    if os.path.exists("links.txt") == False:
+        #checks if the links file exists
+        links_txt = open("links.txt","w")
+        #and if it doesnt, it creates one
+    if os.path.exists("config.txt") == False:
+        with open("config.txt") as cfg:
+            #write default config
+            print("missing config.txt")
 def get_link_user():
     link = input("Enter the link of YouTube video you want to download:  ") #fetch user input for the youtube video link
     return link
@@ -217,10 +226,12 @@ def showdetails(yt):
     #then print it
 
     views_raw = yt.views
-    #get the views and organise them with dots and replace for example xx.32.xx with xx.032.xx
+    #get the views 
     views = ""
     views_raw = format(views_raw,  ',')
+    #then format them with commas for each three digits
     views = views_raw.replace(",  ",  ".")
+    #then because im european, replace the commas with dots
     print("Number of views: ",  views)
 
     length_sec = yt.length
@@ -232,22 +243,30 @@ def showdetails(yt):
         length = str(hours)+":"
     else:
         length = ""
+        #first, if the video is over one hour, divide the seconds by 
+        #3600 and round it down, to get the full hours
+        #then the full hours are added to the beginning of the final string
     
     minutes = (length_sec // 60) -(hours*60)
     seconds = length_sec - (minutes*60+hours*3600)
+    #then do the same with the minutes, but remove the full hours
     length += str(minutes)+":"
+    #then also add it
 
     if minutes != 0 and seconds // 10 == 0:
         length += str(0)
     length += str(seconds)
+    #then add the rest seconds
 
     print("Length of video: ",  length)
     print("")
+    #and print it
 
 def get_filesize(yt,  aud_only,  tag1:int,  tag2:int):
     #Streams
     stream1 = yt.streams.get_by_itag(tag1)
     stream2 = yt.streams.get_by_itag(tag2)
+    #first set the two streams from the itags given
 
     #Sizes
     size1 = stream1.filesize_approx
@@ -357,12 +376,14 @@ def download_and_merge(link:str,  res,  abr):
 
 
 if os.path.exists(tmp_dir):
-    shutil.rmtree(tmp_dir)
-
-
+    shutil.rmtree(tmp_dir)#
+    #checks if the temporary directory exists and removes it
 
 if os.path.getsize("links.txt") != 0:
+    #cheks if the links file contains writing
     with open("config.txt") as fp:
+        #open the config file to process the links file
+        #the following is temporary and will be replaced by a proper config parser soon, I promise!
         for i,  line in enumerate(fp):
             if i == 0:
                 res = line
@@ -372,18 +393,28 @@ if os.path.getsize("links.txt") != 0:
                 abr = int(''.join(filter(str.isdigit,  abr)))
             elif i > 1:
                 break
+            #but it looks for the audiobitrate and resolution options
     with open("links.txt") as file:
         lines = file.readlines()
         lines = [line.rstrip() for line in lines]
+        #as the links file contains content, it gets cleaned
         for i in lines:
+        #then loop through all the links
             download_and_merge(i,  res,  abr)
+            #and run the download and merge function with the link and the config settings from above
     file = open("links.txt",  "w")
+    #after processing all the videos, open the links file in write mode
     file.truncate(0)
+    #and delete the content
     download_and_merge(get_link_user(),  None,  None)
+    #then ask for new user input
 
 
 elif os.path. getsize("links.txt") == 0:
+    #if there are no links in the links file
     download_and_merge(get_link_user(),  None,  None)
+    #ask for user input
+
 #todo:
 # O kommentieren
 # O playlist runterladen
@@ -395,7 +426,6 @@ elif os.path. getsize("links.txt") == 0:
 # O progress bars (evtl. merging) converting
 # O Grafikkarte nutzen (+config option (amd/Nvidia/Intel)) https://youtu.be/m3e4ED6FY4U
 # O setup.py (links.txt,  config erstellen etc)
-# O Github release
 # O Videocodec auswahl via config (MPEG-4(H.264/Nvenc/VCE) / VP9 / AV1 / Theora)
 # O Videocontainer auswahl via config (mkv / mp4 / qtff / asf / avi / mxf / PS / TS / m2ts / evo / 3gp / 3g2 / f4v / ogg / webm)
 # O Audiocodec auswahl via config (aac, mp3, opus, flac())
