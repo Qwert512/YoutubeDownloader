@@ -1,13 +1,12 @@
 from pytube import YouTube
-import requests,  os,  json,  ffmpeg,  shutil
+import requests,  os,  json,  ffmpeg,  shutil, configparser
 from subprocess import check_output,  run
-
-
 #required modules
-API_KEY = "AIzaSyCAxlEjJXoDBi2xLP79vYG3qMonJ4OAsG0" #google api key for youtube v3 api
-tmp_dir = './Downloads_tmp/'
+
+tmp_dir = './Downloads_tmp/' 
 download_dir = './Downloads/'
 file_dir = os.path.realpath(__file__)[:-len(os.path.basename(__file__))][:-1]
+#get the directory the script runs in
 
 #ask for the link from the user
 def setup():
@@ -19,6 +18,16 @@ def setup():
         with open("config.txt") as cfg:
             #write default config
             print("missing config.txt")
+def config():
+    config = configparser.ConfigParser()
+    config.read('config.txt')
+    global API_KEY 
+    global cfg_resolution
+    global cfg_abr
+    API_KEY = config['misc']['api_key']
+    cfg_resolution = config['video']['resolution']
+    cfg_abr = config['audio']['abr']
+    
 def get_link_user():
     link = input("Enter the link of YouTube video you want to download:  ") #fetch user input for the youtube video link
     return link
@@ -263,20 +272,25 @@ def showdetails(yt):
     #and print it
 
 def get_filesize(yt,  aud_only,  tag1:int,  tag2:int):
-    #Streams
     stream1 = yt.streams.get_by_itag(tag1)
     stream2 = yt.streams.get_by_itag(tag2)
-    #first set the two streams from the itags given
+    #first set the two streams from the itags given in the function call
+    #One of the streams is for audio, one for video
+    #In case of audio only, both are the same and one will be removed later
 
-    #Sizes
     size1 = stream1.filesize_approx
     size2 = stream2.filesize_approx
+    #then get the size for both 
 
     if aud_only == True:
         size2 = 0
+        #if it is audio only, one of them will be removed
     
     size_tot = str(size1 + size2)
+    #then the two sizes are combined
     length = len(size_tot)
+    #then the length of the size in bytes is taken, 
+    #so it can be displayed more nicely in for example MB
 
 
     if length < 4:
@@ -289,7 +303,9 @@ def get_filesize(yt,  aud_only,  tag1:int,  tag2:int):
         size_tot = size_tot[:length-9]+" GB"
     elif length < 16 and length > 12:
         size_tot = size_tot[:length-12]+" TB"
+        #here the formatting is done
     return size_tot
+    #now the formatted size is returned
 
 
 
@@ -373,34 +389,19 @@ def download_and_merge(link:str,  res,  abr):
     shutil.rmtree(tmp_dir)
     print("Merging completed.")
 
-
-
 if os.path.exists(tmp_dir):
-    shutil.rmtree(tmp_dir)#
+    shutil.rmtree(tmp_dir)
     #checks if the temporary directory exists and removes it
 
 if os.path.getsize("links.txt") != 0:
     #cheks if the links file contains writing
-    with open("config.txt") as fp:
-        #open the config file to process the links file
-        #the following is temporary and will be replaced by a proper config parser soon, I promise!
-        for i,  line in enumerate(fp):
-            if i == 0:
-                res = line
-                res = int(''.join(filter(str.isdigit,  res)))
-            elif i == 1:
-                abr = line
-                abr = int(''.join(filter(str.isdigit,  abr)))
-            elif i > 1:
-                break
-            #but it looks for the audiobitrate and resolution options
     with open("links.txt") as file:
         lines = file.readlines()
         lines = [line.rstrip() for line in lines]
         #as the links file contains content, it gets cleaned
         for i in lines:
         #then loop through all the links
-            download_and_merge(i,  res,  abr)
+            download_and_merge(i,  cfg_resolution,  cfg_abr)
             #and run the download and merge function with the link and the config settings from above
     file = open("links.txt",  "w")
     #after processing all the videos, open the links file in write mode
@@ -420,9 +421,8 @@ elif os.path. getsize("links.txt") == 0:
 # O playlist runterladen
 # O UI
 # O Multitasking (downloaden während conversion,  conversion während merging) threading / Wenns sein muss "AsyncIO"
-# O speed mode (yt.streams.get_highest_resolution())
 # O Bei Qualitätsauswahl anzeigen wenn audio / video auf einmal verfügbar
-# O mehr config möglichkeiten mit config parser
+# X mehr config möglichkeiten mit config parser
 # O progress bars (evtl. merging) converting
 # O Grafikkarte nutzen (+config option (amd/Nvidia/Intel)) https://youtu.be/m3e4ED6FY4U
 # O setup.py (links.txt,  config erstellen etc)
