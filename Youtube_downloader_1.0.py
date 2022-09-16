@@ -3,6 +3,7 @@ import requests,  os,  json,  ffmpeg,  shutil, configparser
 from subprocess import check_output,  run
 #required modules
 
+API_KEY = "AIzaSyAzkLcbTqYfW8KHY5lZQlVdPeCzI4D8xIc"
 tmp_dir = './Downloads_tmp/' 
 download_dir = './Downloads/'
 file_dir = os.path.realpath(__file__)[:-len(os.path.basename(__file__))][:-1]
@@ -25,25 +26,25 @@ def config():
     global cfg_resolution
     global cfg_abr
     API_KEY = config['misc']['api_key']
-    cfg_resolution = config['video']['resolution']
-    cfg_abr = config['audio']['abr']
+    cfg_resolution = int(config['video']['resolution'])
+    cfg_abr = int(config['audio']['abr'])
     
 def get_link_user():
     link = input("Enter the link of YouTube video you want to download:  ") #fetch user input for the youtube video link
     return link
 
-
-def get_channel_id(yt):
-    return yt.channel_id
+def get_channel_title(yt):
+    cid = yt.channel_id
     #gives the channel id (the part behind the https://www.youtube.com/c/)
-
-def get_channel_title(cid):
     url = "https://www.googleapis.com/youtube/v3/search?part=snippet&channelId={cid}&key={api_key}".format(
         #api request containing the channel id (cid) and the google api key (API_KEY)
         cid=cid,  api_key=API_KEY
     )
-    d = requests.get(url).json()
-    return d['items'][0]['snippet']['channelTitle']
+    try:
+        d = requests.get(url).json()
+        return d['items'][0]['snippet']['channelTitle']
+    except:
+        return "API key error"
     #makes an api request to the youtube v3 api by google and get the output in json form
     #then only get the channel name
 
@@ -228,8 +229,7 @@ def showdetails(yt):
     print("Title: ",  yt.title)
     #title of the video
 
-    channel_id = get_channel_id(yt)
-    channel_title = get_channel_title(channel_id)
+    channel_title = get_channel_title(yt)
     #get channel id (link) and convert it to a name
     print("Channel: ",  channel_title)
     #then print it
@@ -388,6 +388,8 @@ def download_and_merge(link:str,  res,  abr):
     
     shutil.rmtree(tmp_dir)
     print("Merging completed.")
+
+config()
 
 if os.path.exists(tmp_dir):
     shutil.rmtree(tmp_dir)
