@@ -9,6 +9,6 @@ abr = 10
 #only for links/playlist mode
 
 [misc]
-api_key = "AIzaSyCAxlEjJXoDBi2xLP79vYG3qMonJ4OAsG0"
+api_key = AIzaSyAzkLcbTqYfW8KHY5lZQlVdPeCzI4D8xIc
 #Aoogle api key for youtube v3 api
 #used for displaying the channel title
