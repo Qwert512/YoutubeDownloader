@@ -27,9 +27,11 @@ def config():
     global API_KEY 
     global cfg_resolution
     global cfg_abr
+    global cfg_everywhere
     API_KEY = config['misc']['api_key']
     cfg_resolution = int(config['video']['resolution'])
     cfg_abr = int(config['audio']['abr'])
+    cfg_everywhere = bool(config["misc"]["config_everywhere"])
     
 def get_link_user():
     link = input("Enter the link of YouTube video you want to download:  ") #fetch user input for the youtube video link
@@ -316,7 +318,9 @@ def download_and_merge(link:str,  res,  abr):
     yt = YouTube(link)
     #create an empty stream for further use in comparisons
     showdetails(yt)
-
+    if cfg_everywhere == True:
+        res = cfg_resolution
+        abr = cfg_abr
 
     if res != 0:
         vid_itag,  vid_type,  aud_only = get_video_itag(yt,  res)
@@ -458,7 +462,7 @@ elif os.path. getsize("links.txt") == 0:
 
 #todo:
 # O kommentieren
-# O playlist runterladen
+# X playlist runterladen
 # O UI
 # O Multitasking (downloaden während conversion,  conversion während merging) threading / Wenns sein muss "AsyncIO"
 # O Bei Qualitätsauswahl anzeigen wenn audio / video auf einmal verfügbar
