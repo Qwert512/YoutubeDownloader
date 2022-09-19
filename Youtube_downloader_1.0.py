@@ -1,4 +1,6 @@
-from pytube import YouTube
+#made by Qwert512 on github
+#version: 1.0.1
+from pytube import YouTube, Playlist
 import requests,  os,  json,  ffmpeg,  shutil, configparser
 from subprocess import check_output,  run
 #required modules
@@ -389,6 +391,41 @@ def download_and_merge(link:str,  res,  abr):
     shutil.rmtree(tmp_dir)
     print("Merging completed.")
 
+def download_playlist(link: str):
+    p = Playlist(link)
+    for url in p.video_urls:
+        download_and_merge(url, cfg_resolution, cfg_abr)
+
+def process_link(link: str, cfg: bool):
+     
+    if "playlist" in link:
+        #if a clean playlist link is detected: 
+        #download the playlist with config settings
+        print("Do you want to download the entire playlist? (y/n)")
+        ans = input()
+        if ans == "y" or "Y":
+            download_playlist(link)
+        else:
+            return
+    
+    elif "list=" in link and "playlist" not in link:
+        print("This video is in a playlist.")
+        print("Do you want to download only this video (0)")
+        print("or do you want to download the entire playlist (1)?")
+        tmp = input ("0/1: ")
+        if tmp == "0":
+            download_and_merge(link,None,None)
+        elif tmp == "1":
+            download_playlist(link)
+    elif "youtu.be/" in link or "youtube.com/watch?v=" in link and "list=" not in link:
+        #checks if it a normal youtube video link (no playlist)
+        if cfg == True:
+            download_and_merge(link,  cfg_resolution,  cfg_abr)
+            #if the link is from the links.txt file, it uses the config settings
+        if cfg == False:
+            download_and_merge(link,  None,  None)
+            #if the link is from the user, ask the user for the settings later
+
 config()
 
 if os.path.exists(tmp_dir):
@@ -403,19 +440,20 @@ if os.path.getsize("links.txt") != 0:
         #as the links file contains content, it gets cleaned
         for i in lines:
         #then loop through all the links
-            download_and_merge(i,  cfg_resolution,  cfg_abr)
+            process_link(i, True)
             #and run the download and merge function with the link and the config settings from above
     file = open("links.txt",  "w")
     #after processing all the videos, open the links file in write mode
     file.truncate(0)
     #and delete the content
-    download_and_merge(get_link_user(),  None,  None)
+    
     #then ask for new user input
 
 
 elif os.path. getsize("links.txt") == 0:
     #if there are no links in the links file
-    download_and_merge(get_link_user(),  None,  None)
+    link = get_link_user()
+    process_link(link, False)
     #ask for user input
 
 #todo:
