@@ -17,3 +17,5 @@ api_key = AIzaSyAzkLcbTqYfW8KHY5lZQlVdPeCzI4D8xIc
 config_everywhere = False
 #if config everywhere is set to true, the settings above 
 #will be applied to every video, so way less manual input is reqired
+reset = False
+#set this to true to reset everything when executing the program the next time
