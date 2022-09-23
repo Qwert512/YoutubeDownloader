@@ -1,26 +1,17 @@
 #made by Qwert512 on github
-#version: 1.0.2
+#version: 1.0.3
 from pytube import YouTube, Playlist
 import requests,  os,  json,  ffmpeg,  shutil, configparser
 from subprocess import check_output,  run
+import create_config
+#setup routine
 #required modules
-
 
 tmp_dir = './Downloads_tmp/' 
 download_dir = './Downloads/'
 file_dir = os.path.realpath(__file__)[:-len(os.path.basename(__file__))][:-1]
 #get the directory the script runs in
 
-#ask for the link from the user
-def setup():
-    if os.path.exists("links.txt") == False:
-        #checks if the links file exists
-        links_txt = open("links.txt","w")
-        #and if it doesnt, it creates one
-    if os.path.exists("config.txt") == False:
-        with open("config.txt") as cfg:
-            #write default config
-            print("missing config.txt")
 def config():
     config = configparser.ConfigParser()
     config.read('config.txt')
@@ -460,11 +451,13 @@ def main():
         link = get_link_user()
         process_link(link, False)
         #ask for user input
+create_config.create_config()
+#setup routine
 config()
 while True:
     main()
 
-#todo:
+# TODO:
 # O kommentieren
 # O UI
 # O Multitasking (downloaden während conversion,  conversion während merging) threading / Wenns sein muss "AsyncIO"
@@ -472,7 +465,6 @@ while True:
 # X mehr config möglichkeiten mit config parser
 # O progress bars (evtl. merging) converting
 # O Grafikkarte nutzen (+config option (amd/Nvidia/Intel)) https://youtu.be/m3e4ED6FY4U
-# O setup.py (links.txt,  config erstellen etc)
 # O Videocodec auswahl via config (MPEG-4(H.264/Nvenc/VCE) / VP9 / AV1 / Theora)
 # O Videocontainer auswahl via config (mkv / mp4 / qtff / asf / avi / mxf / PS / TS / m2ts / evo / 3gp / 3g2 / f4v / ogg / webm)
 # O Audiocodec auswahl via config (aac, mp3, opus, flac())

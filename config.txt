@@ -1,18 +1,18 @@
 [video]
 resolution = 6
-#resolution: 0 = audio only, 1 = 144p, 2 = 240p, 3 = 360p, 4 = 480p, 
+#resolution: 0 = audio only, 1 = 144p, 2 = 240p, 3 = 360p, 4 = 480p,
 #5 = 720p, 6 = 1080p, 7 = 1440p, 8 = 4k, 9 = 8k, 10 = max quality
 #only for links/playlist mode
 
 [audio]
-abr = 10
+abr = 0
 #audio bitrate (abr): 1 = 48kbps, 2 = 50kbps, 3 = 70kbps, 4 = 128kbps, 
 #5 = 160kbps, 10 = max quality
 #only for links/playlist mode
 
 [misc]
 api_key = AIzaSyAzkLcbTqYfW8KHY5lZQlVdPeCzI4D8xIc
-#Aoogle api key for youtube v3 api
+#aoogle api key for youtube v3 api
 #used for displaying the channel title
 config_everywhere = False
 #if config everywhere is set to true, the settings above 
