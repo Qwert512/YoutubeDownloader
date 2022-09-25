@@ -10,6 +10,7 @@ import create_config
 tmp_dir = './Downloads_tmp/' 
 download_dir = './Downloads/'
 file_dir = os.path.realpath(__file__)[:-len(os.path.basename(__file__))][:-1]
+
 #get the directory the script runs in
 
 def config():
