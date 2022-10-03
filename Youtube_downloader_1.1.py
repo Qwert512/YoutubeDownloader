@@ -2,15 +2,18 @@
 #version: 1.1.0
 from pytube import YouTube, Playlist
 import requests,  os,  json,  ffmpeg,  shutil, configparser, asyncio, time
-from subprocess import check_output,  run
+from subprocess import call, check_output
 import create_config
 import numpy as np
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 #setup routine
 #required modules
 index_total = int()
 index_download = int()
 index_convert = int()
 index_merge = int()
+flag = 1
 
 download_done = bool()
 convert_done = bool()
@@ -144,66 +147,14 @@ class Video:
         self.resolution = resolution
         self.yt = YouTube(self.link)
         self.index = index
+        self.a_itag = int()
+        self.v_itag = int()
     
     async def preparation(self):
         
-        showdetails(self.yt)
+        await showdetails(self.yt)
 
-        #audio itag
-
-        #defining the function to get a specific stream id for the audio stream
-        streams = set()
-        #define streams as an empty set
-        for stream in self.yt.streams.filter(type="audio"):
-        #filter for audio streams
-            streams.add(stream.abr)
-            #then add the audiobitrate attribute of the stream object to the set
-
-        bitrates = []
-        #define the bitrates array to hald all the audio vitrates from above,  as the set is pretty unusable
-        for i in streams:
-            #loop through the set
-            rate = int(i[:-4])
-            #then remove the kbps ending and convert the number to int for further usage
-            bitrates.append(rate)
-            #then add the number to the array
-        bitrates.sort()
-        #before sorting it from lowest to highest
-        for u in range(len(bitrates)):
-            #looping through the sorted bitrates and adding back the "kbps" ending
-            bitrates[u] = str(bitrates[u])+"kbps"
-        print("Pick one of the bitrates below:")
-        #then list the availible audiobitrates with an index before
-        o = 0
-        for k in range(len(bitrates)):
-            o+= 1
-            print(str(o)+": "+bitrates[k])
-        if self.abr == None:
-            rate = int(input(""))
-        else:
-            rate = self.abr
-        #then ask for user input in form of an index shifted by one
-        rate -= 1
-        #convert the index to the corresponding array index
-        if rate < 0:
-            rate = 0
-        if rate > len(bitrates)-1:
-            rate = len(bitrates)-1
-        #filter faulty user input out
-        output = self.yt.streams.filter(abr=bitrates[rate])[0]
-        #get the first availible audio stream with a fitting audio bitrate
-        tag = output.itag
-        #then get the corresponding itag attribute from the stream object (unique identifier of the stream)
-        aud_type = output.subtype
-        #then get the cooresponding subtype attribute from the stream object,  for further use in conversion,  path related tasks etc.
-
-        tag = int(tag)
-        #convert the itag to int as that datatype is required in further processing
-        self.a_itag = tag
-        self.aud_type = aud_type
-        #return the itag and datatype
-
-        #video itag
+#video itag
 
         streams = set()
     
@@ -300,8 +251,66 @@ class Video:
         self.aud_only = aud_only
 
 
+        #audio itag
+
+        #defining the function to get a specific stream id for the audio stream
+        streams = set()
+        #define streams as an empty set
+        for stream in self.yt.streams.filter(type="audio"):
+        #filter for audio streams
+            streams.add(stream.abr)
+            #then add the audiobitrate attribute of the stream object to the set
+
+        bitrates = []
+        #define the bitrates array to hald all the audio vitrates from above,  as the set is pretty unusable
+        for i in streams:
+            #loop through the set
+            rate = int(i[:-4])
+            #then remove the kbps ending and convert the number to int for further usage
+            bitrates.append(rate)
+            #then add the number to the array
+        bitrates.sort()
+        #before sorting it from lowest to highest
+        for u in range(len(bitrates)):
+            #looping through the sorted bitrates and adding back the "kbps" ending
+            bitrates[u] = str(bitrates[u])+"kbps"
+        print("\nPick one of the bitrates below:")
+        #then list the availible audiobitrates with an index before
+        o = 0
+        for k in range(len(bitrates)):
+            o+= 1
+            print(str(o)+": "+bitrates[k])
+        if self.abr == None:
+            rate = int(input(""))
+        else:
+            rate = self.abr
+        print("\n")
+        #then ask for user input in form of an index shifted by one
+        rate -= 1
+        #convert the index to the corresponding array index
+        if rate < 0:
+            rate = 0
+        if rate > len(bitrates)-1:
+            rate = len(bitrates)-1
+        #filter faulty user input out
+        output = self.yt.streams.filter(abr=bitrates[rate])[0]
+        #get the first availible audio stream with a fitting audio bitrate
+        tag = output.itag
+        #then get the corresponding itag attribute from the stream object (unique identifier of the stream)
+        aud_type = output.subtype
+        #then get the cooresponding subtype attribute from the stream object,  for further use in conversion,  path related tasks etc.
+
+        tag = int(tag)
+        #convert the itag to int as that datatype is required in further processing
+        self.a_itag = tag
+        self.aud_type = aud_type
+        #return the itag and datatype
+
+        
+
+
     async def download(self):
-        self.preparation()
+        await self.preparation()
         global index_download
         global download_done
         index_download = self.index
@@ -322,18 +331,23 @@ class Video:
         print(self.aud_stream)
 
         if self.aud_only == True:
-            self.filesize = get_filesize(self.yt,  self.aud_only,  self.a_itag,  self.a_itag)
+            self.filesize = await get_filesize(self.yt,  self.aud_only,  self.a_itag,  self.a_itag)
         else:
-            self.filesize = get_filesize(self.yt,  self.aud_only,  self.v_itag,  self.v_itag)
+            self.filesize = await get_filesize(self.yt,  self.aud_only,  self.v_itag,  self.v_itag)
     
         #Starting download
         print("Downloading approximately "+self.filesize+"...")
         if self.aud_only == False:
             self.vid_stream.download(self.tmp_dir)
-        os.rename(self.download_dir+self.vid_stream.default_filename,self.download_dir+(self.vid_stream.default_filename.replace(" ","_")))
-
+            try:
+                os.rename(self.file_dir+self.tmp_dir[1:]+self.vid_stream.default_filename,self.file_dir+self.tmp_dir[1:]+"v_"+(self.vid_stream.default_filename.replace(" ","_")))
+            except:
+                FileExistsError
         self.aud_stream.download(self.tmp_dir)
-        os.rename(self.tmp_dir+self.aud_stream.default_filename,self.tmp_dir+(self.aud_stream.default_filename.replace(" ","_")))
+        try:
+            os.rename(self.tmp_dir+self.aud_stream.default_filename,self.tmp_dir+"a_"+(self.aud_stream.default_filename.replace(" ","_")))
+        except:
+            FileExistsError
         print("Download completed.")
         download_done = True
     
@@ -345,22 +359,35 @@ class Video:
         convert_done = False
 
         print("\nConverting...")
+        a_inname = self.tmp_dir+"a_"+self.cln_aud_name
+        a_outname = self.tmp_dir+self.cln_aud_name[:-len(self.aud_type)] + "mp3"
+        if os.path.exists(a_outname):
+            os.remove(a_outname)
+        v_inname = self.tmp_dir+"v_"+self.cln_vid_name
+        v_outname = self.tmp_dir+self.cln_vid_name[:-len(self.vid_type)] + "mp4"
+        if os.path.exists(v_outname):
+            os.remove(v_outname)
+            
 
         if self.aud_type != "mp3":
                 #Define the convert method. It takes the in and output folders,  the filename,  filetype and the wanted output filetype
-            conv_in = ffmpeg.input (self.tmp_dir+self.cln_aud_name)
-            conv = ffmpeg.output (conv_in,  self.tmp_dir+self.cln_aud_name[-len(self.aud_type)] + "mp3",  )
-            ffmpeg.run (conv,  quiet=True)
+            conv_in = ffmpeg.input (a_inname)
+            conv = ffmpeg.output (conv_in.audio,  a_outname)
+            ffmpeg.run (conv,  quiet=False)
             #runs the conversion. quiet flag so the console doesnt get spammed,  as there is a LOT of debug in ffmpeg
-            os.remove(self.tmp_dir+self.cln_aud_name)
+            os.remove(self.tmp_dir+"a_"+self.cln_aud_name)
+        elif self.aud_type == "mp3":
+            os.rename(a_inname,  a_outname)
 
 
         if self.aud_only == False and self.vid_type != "mp4":
-            conv_in = ffmpeg.input (self.tmp_dir+self.cln_vid_name)
-            conv = ffmpeg.output (conv_in.video,  self.tmp_dir+self.cln_vid_name[-len(self.vid_type)] + "mp4",  )
-            ffmpeg.run (conv,  quiet=True)
+            conv_in = ffmpeg.input (v_inname)
+            conv = ffmpeg.output (conv_in.video, v_outname)
+            ffmpeg.run (conv,  quiet=False)
             #runs the conversion. quiet flag so the console doesnt get spammed,  as there is a LOT of debug in ffmpeg
-            os.remove(self.tmp_dir+self.cln_vid_name)
+            os.remove(self.tmp_dir+"v_"+self.cln_vid_name)
+        elif(self.vid_type == "mp4"):
+            os.rename(v_inname,v_outname)
         print("Converting completed.")
         
         convert_done = True
@@ -377,7 +404,7 @@ class Video:
             
         else:
             command = "ffmpeg -i "+self.file_dir+self.tmp_vid_name[1:]+" -i "+self.file_dir+self.tmp_aud_name[1:]+" -c:v copy -c:a copy -hide_banner -loglevel error "+self.file_dir+self.vid_name[1:]
-            run(command,check = True)
+            call(command,  shell = True)
             os.remove(self.tmp_vid_name)
             os.remove(self.tmp_aud_name)
 
@@ -400,6 +427,7 @@ link_index = 0
 
 
 async def link():
+    global vids, vid_index, links, link_index
     while True:
         if os.path.getsize("links.txt") != 0:
             #cheks if the links file contains writing
@@ -427,37 +455,59 @@ async def link():
             #after processing all the videos, open the links file in write mode
             file.truncate(0)
         else:
-            link = get_link_user()
-            if "playlist" in link:
+            link_inpt = await get_link_user()
+            if "playlist" in link_inpt:
                 #if a clean playlist link is detected: 
                 #download the playlist with config settings
                 print("Do you want to download the entire playlist? (y/n)")
                 ans = input()
                 if ans == "y" or "Y":
-                    p = Playlist(link)
+                    p = Playlist(link_inpt)
                     for i in p.video_urls:
                         links[link_index] = i,"True"
                         link_index += 1
             else:
-                links[link_index] = link,str(cfg_everywhere)
+                links[link_index] = link_inpt,str(cfg_everywhere)
                 link_index += 1
-        asyncio.sleep(0.2)
+        await asyncio.sleep(0.2)
     
 async def vid():
+    global vids, vid_index, links, link_index, flag
     while True:
         if link_index > vid_index:
             if bool(links[vid_index][1]):
-                vids[vid_index] = Video(links[vid_index][0], cfg_abr, cfg_resolution, vid_index)
+                vids.append(Video(links[vid_index][0], cfg_abr, cfg_resolution, vid_index))
             else:
                 vids[vid_index] = Video(links[vid_index][0], None,None, vid_index)
             vid_index += 1
-        asyncio.sleep(0.1)
+            flag = 0
+        await asyncio.sleep(0.1)
+async def run():
+    global flag
+    if flag == 0:
+        await vids[0].download()
+        await vids[0].convert()
+        await vids[0].merge()
+        flag = 1
+    await asyncio.sleep(0.2)
 
 loop = asyncio.get_event_loop()
 loop.create_task(link())
 loop.create_task(vid())
+loop.create_task(run())
 loop.run_forever()
 
-vids[0].download()
-vids[0].convert()
-vids[0].merge()
+
+# TODO:
+# O kommentieren
+# O UI
+# O Multitasking (downloaden während conversion,  conversion während merging) AsyncIO
+# O Bei Qualitätsauswahl anzeigen wenn audio / video auf einmal verfügbar
+# X mehr config möglichkeiten mit config parser
+# O progress bars (evtl. merging) converting
+# O Grafikkarte nutzen (+config option (amd/Nvidia/Intel)) https://youtu.be/m3e4ED6FY4U
+# O Videocodec auswahl via config (MPEG-4(H.264/Nvenc/VCE) / VP9 / AV1 / Theora)
+# O Videocontainer auswahl via config (mkv / mp4 / qtff / asf / avi / mxf / PS / TS / m2ts / evo / 3gp / 3g2 / f4v / ogg / webm)
+# O Audiocodec auswahl via config (aac, mp3, opus, flac())
+# O Audiocontainer auswahl via config
+# O Codec / Containerkombination überprüfen und ggf korrigieren
