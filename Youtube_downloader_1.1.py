@@ -32,7 +32,8 @@ def config():
         API_KEY = None
     cfg_resolution = int(config['video']['resolution'])
     cfg_abr = int(config['audio']['abr'])
-    cfg_everywhere = bool(config["misc"]["config_everywhere"])
+    cfg_everywhere_str = config["misc"]["config_everywhere"]
+    cfg_everywhere = {'true': True, 'false': False}.get(cfg_everywhere_str.lower(), False)
 
 async def get_filesize(yt,  aud_only,  tag1:int,  tag2:int):
     stream1 = yt.streams.get_by_itag(tag1)
@@ -349,6 +350,7 @@ class Video:
         except:
             FileExistsError
         print("Download completed.")
+        print("Resolution: "+str(self.resolution))
         download_done = True
     
     async def convert(self):
@@ -421,7 +423,7 @@ config()
 
 vids = []
 vid_index = 0
-links =  [["link","cfg"]]
+links =  []
 link_index = 0
 
 
@@ -467,7 +469,7 @@ async def link():
                         links[link_index] = i,"True"
                         link_index += 1
             else:
-                links[link_index] = link_inpt,str(cfg_everywhere)
+                links.append([link_inpt,str(cfg_everywhere)])
                 link_index += 1
         await asyncio.sleep(0.2)
     
@@ -475,10 +477,17 @@ async def vid():
     global vids, vid_index, links, link_index, flag
     while True:
         if link_index > vid_index:
-            if bool(links[vid_index][1]):
+            apply_cfg_str = links[vid_index][1]
+            apply_cfg = {'true': True, 'false': False}.get(apply_cfg_str.lower(), False)
+            if apply_cfg:
+                print(links[vid_index][1])
                 vids.append(Video(links[vid_index][0], cfg_abr, cfg_resolution, vid_index))
+                print("downloading with cfg")
+                print(cfg_everywhere)
             else:
-                vids[vid_index] = Video(links[vid_index][0], None,None, vid_index)
+                print(links[vid_index][0])
+                vids.append(Video(links[vid_index][0], None,None, vid_index))
+                print("downloading manaual")
             vid_index += 1
             flag = 0
         await asyncio.sleep(0.1)

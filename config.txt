@@ -11,9 +11,6 @@ abr = 0
 #only for links/playlist mode
 
 [misc]
-api_key = Write your API key here
-#aoogle api key for youtube v3 api
-#used for displaying the channel title
 config_everywhere = False
 #if config everywhere is set to true, the settings above 
 #will be applied to every video, so way less manual input is reqired

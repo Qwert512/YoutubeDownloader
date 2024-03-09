@@ -1,0 +1,18 @@
+Todo:
+
+simple mode:
+    -playlist download
+    -limited config
+    -just work, extra robust
+    -ffmpeg alternative
+
+advanced mode:
+    -lots of fancy stuff
+    -music mode
+        -cd download and segmentation
+    -video mode
+
+Short term:
+    -fix aud only conv being fucked
+    -fix playlist mode
+    -use cfg choices
