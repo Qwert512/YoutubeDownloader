@@ -13,6 +13,4 @@ advanced mode:
     -video mode
 
 Short term:
-    -fix aud only conv being fucked
-    -fix playlist mode
     -use cfg choices

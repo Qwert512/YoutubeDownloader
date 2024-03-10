@@ -16,4 +16,6 @@ config_everywhere = False
 #will be applied to every video, so way less manual input is reqired
 reset = False
 #set this to true to reset everything when executing the program the next time
+debug = False
+#set this to true to show debug information, when running the script
 

@@ -41,6 +41,8 @@ def create_config():
         config.set('misc', '#will be applied to every video, so way less manual input is reqired')
         config.set('misc', 'reset', 'False')
         config.set('misc', '#set this to true to reset everything when executing the program the next time')
+        config.set('misc', 'debug', 'False')
+        config.set('misc', '#set this to true to show debug information, when running the script')
         
         with open("config.txt","w") as file:
             config.write(file)
