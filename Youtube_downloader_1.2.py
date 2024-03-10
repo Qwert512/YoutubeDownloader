@@ -1,10 +1,8 @@
 #made by Qwert512 on github
-#version: 1.2.1
+#version: 1.2.2
 from pytube import YouTube, Playlist
-import requests,  os,  json,  ffmpeg,  shutil, configparser, asyncio, time
-from subprocess import call, check_output
+import os, shutil, configparser, asyncio
 import create_config, util
-import numpy as np
 import warnings
 from moviepy.editor import VideoFileClip, AudioFileClip
 warnings.filterwarnings("ignore", category=DeprecationWarning)
