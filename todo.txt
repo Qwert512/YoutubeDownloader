@@ -12,5 +12,8 @@ advanced mode:
         -cd download and segmentation
     -video mode
 
-Short term:
-    -use cfg choices
+
+mp3 split:
+    -video compatibility
+    -settings and stuff
+    -integrate

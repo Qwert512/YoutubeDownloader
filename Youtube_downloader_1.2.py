@@ -53,7 +53,7 @@ class Video:
     download_dir = './Downloads/'
     file_dir = os.path.realpath(__file__)[:-len(os.path.basename(__file__))][:-1]
 
-    def __init__(self, link:str, abr:int, resolution:int):
+    def __init__(self, link:str, abr, resolution):
         self.link = link
         self.abr = abr
         self.resolution = resolution
