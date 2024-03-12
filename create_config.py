@@ -34,7 +34,6 @@ def create_config():
         config.set('audio', '#5 = 160kbps, 10 = max quality')
         config.set('audio', '#only for links/playlist mode')
 
-
         config.add_section('misc')
         config.set('misc', 'config_everywhere', 'False')
         config.set('misc', '#if config everywhere is set to true, the settings above ')
@@ -43,6 +42,11 @@ def create_config():
         config.set('misc', '#set this to true to reset everything when executing the program the next time')
         config.set('misc', 'debug', 'False')
         config.set('misc', '#set this to true to show debug information, when running the script')
+        config.set('misc', 'mode', 'simple')
+        config.set('misc', '#possible modes: simple, music, video')
+        config.set('misc', 'autodownload_playlists', 'False')
+        config.set('misc', '#automatically confirm, that you want to download the entire playlist')
+
         
         with open("config.txt","w") as file:
             config.write(file)

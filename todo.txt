@@ -1,5 +1,7 @@
 Todo:
 
+config als Objekt
+
 simple mode:
     -playlist download
     -limited config

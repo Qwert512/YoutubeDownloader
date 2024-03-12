@@ -17,16 +17,42 @@ def config():
     global cfg_abr
     global cfg_everywhere
     global debug
+    global autodownload_playlists
+    global mode
 
-    config = configparser.ConfigParser()
-    config.read('config.txt')
+    # config = configparser.ConfigParser()
+    # config.read('config.txt')
 
-    debug_str = config["misc"]["debug"]
-    debug = {'true': True, 'false': False}.get(debug_str.lower(), False)
-    cfg_resolution = int(config['video']['resolution'])
-    cfg_abr = int(config['audio']['abr'])
-    cfg_everywhere_str = config["misc"]["config_everywhere"]
-    cfg_everywhere = {'true': True, 'false': False}.get(cfg_everywhere_str.lower(), False)
+    # debug_str = config["misc"]["debug"]
+    # debug = {'true': True, 'false': False}.get(debug_str.lower(), False)
+    # cfg_resolution = int(config['video']['resolution'])
+    # cfg_abr = int(config['audio']['abr'])
+    # cfg_everywhere_str = config["misc"]["config_everywhere"]
+    # cfg_everywhere = {'true': True, 'false': False}.get(cfg_everywhere_str.lower(), False)
+    # autodownload_playlists_str = config["misc"]["autodownload_playlists"]
+    # autodownload_playlists = {'true': True, 'false': False}.get(autodownload_playlists_str.lower(), False)
+    # mode = config["misc"]["mode"]
+    # if mode not in ["simple", "music", "video"]:
+    #     mode = "simple"
+    pass
+
+
+class Config:
+    def __init__(self):
+        config_file = configparser.ConfigParser()
+        config_file.read('config.txt')
+
+        debug_str = config_file["misc"]["debug"]
+        self.debug = {'true': True, 'false': False}.get(debug_str.lower(), False)
+        self.cfg_resolution = int(config_file['video']['resolution'])
+        self.cfg_abr = int(config_file['audio']['abr'])
+        cfg_everywhere_str = config_file["misc"]["config_everywhere"]
+        self.cfg_everywhere = {'true': True, 'false': False}.get(cfg_everywhere_str.lower(), False)
+        autodownload_playlists_str = config_file["misc"]["autodownload_playlists"]
+        self.autodownload_playlists = {'true': True, 'false': False}.get(autodownload_playlists_str.lower(), False)
+        self.mode = config_file["misc"]["mode"]
+        if self.mode not in ["simple", "music", "video"]:
+            self.mode = "simple"
 
 def cleanup():
     #do some cleanup stuff
@@ -201,7 +227,7 @@ class Video:
         self.aud_type = aud_type
         #return the itag and datatype
 
-    async def download(self):
+    async def download(self,config:Config):
         await self.preparation()
         if self.aud_only == False:
             self.vid_stream = self.yt.streams.get_by_itag(self.v_itag)
@@ -213,7 +239,7 @@ class Video:
         self.aud_name = (self.download_dir+self.aud_stream.default_filename[:-len(self.vid_type)]+".mp3").replace(" ",  "_")
         self.tmp_aud_name = (self.tmp_dir+"a_"+self.aud_stream.default_filename).replace(" ",  "_")
         self.cln_aud_name = self.aud_stream.default_filename.replace(" ",  "_")
-        if debug:
+        if config.debug:
             if self.aud_only == False:
                 print(self.vid_stream)
             print(self.aud_stream)
@@ -236,11 +262,11 @@ class Video:
             os.rename(self.tmp_dir+self.aud_stream.default_filename,self.tmp_dir+"a_"+(self.aud_stream.default_filename.replace(" ","_")))
         except:
             FileExistsError
-        if debug:
+        if config.debug:
             print("Download completed.")
     
-    async def convert(self):
-        if debug:
+    async def convert(self, config:Config):
+        if config.debug:
             print("\nConverting...")
         a_inname = self.tmp_dir+"a_"+self.cln_aud_name
         a_outname = self.tmp_dir+self.cln_aud_name[:-len(self.aud_type)] + "mp3"
@@ -256,7 +282,7 @@ class Video:
         if self.aud_type != "mp3":
             audio_clip = AudioFileClip(a_inname)
             # Write the audio clip to a .mp3 file
-            if debug:
+            if config.debug:
                 audio_clip.write_audiofile(a_outname, codec='mp3')
             else:
                 audio_clip.write_audiofile(a_outname, codec='mp3', verbose=False)
@@ -268,22 +294,22 @@ class Video:
         if self.aud_only == False and self.vid_type != "mp4":
             video_clip = VideoFileClip(v_inname)
             # Write the audio clip to a .mp3 file
-            if debug:
+            if config.debug:
                 video_clip.write_videofile(v_outname, codec='mp4')
             else:
                 video_clip.write_videofile(v_outname, codec='mp4', verbose=False)
             os.remove(self.tmp_dir+"v_"+self.cln_vid_name)
         elif(self.vid_type == "mp4" and self.aud_only==False):
             os.rename(v_inname,v_outname)
-        if debug:
+        if config.debug:
             print("Converting completed.")
         
 
-    async def merge(self):
+    async def merge(self, config:Config):
         video_name = self.tmp_dir+self.cln_aud_name[:-len(self.aud_type)] + "mp4"
         audio_name = self.tmp_dir+self.cln_aud_name[:-len(self.aud_type)] + "mp3"
         if self.aud_only:
-            if debug:
+            if config.debug:
                 print("aud_name: "+self.aud_name)
                 print("audio name: "+audio_name)
             if os.path.exists(self.aud_name):
@@ -303,7 +329,7 @@ class Video:
 
             # Write the merged clip to an output file
             output_path = self.vid_name
-            if debug:
+            if config.debug:
                 video_clip.write_videofile(output_path)
             else:
                 video_clip.write_videofile(output_path, verbose=False)
@@ -311,18 +337,18 @@ class Video:
             os.remove(video_name)
             os.remove(audio_name)
 
-        if debug:
+        if config.debug:
             print("Merging completed.")
 
 create_config.create_config()
-config()
+config_object = Config()
 cleanup()
 
 vids = []
 links =  []
 
 
-async def link():
+async def link(config:Config):
     # When saving links, it will be encoded into the liunk, if user input is required
     # Automatic choice will be marked with a "a_" prefix, manual selection will be marked with a "m_" prefix
     global vids, links
@@ -338,9 +364,14 @@ async def link():
                     if "playlist" in u:
                         # if a clean playlist link is detected:
                         # download the playlist with config settings
-                        print("Do you want to download the entire playlist? (y/n)")
-                        ans = input()
-                        if ans.lower() == "y":
+                        if config.autodownload_playlists == False:
+                            print("Do you want to download the entire playlist? (y/n)")
+                            ans = input()
+                            if ans.lower() == "y":
+                                p = Playlist(u)
+                                for i in p.video_urls:
+                                    links.append("a_"+i)
+                        else:
                             p = Playlist(u)
                             for i in p.video_urls:
                                 links.append("a_"+i)
@@ -353,61 +384,66 @@ async def link():
                 if "playlist" in link_inpt:
                     # if a clean playlist link is detected:
                     # download the playlist with config settings
-                    print("Do you want to download the entire playlist? (y/n)")
-                    ans = input()
-                    if ans.lower() == "y":
+                    if config.autodownload_playlists == False:
+                        print("Do you want to download the entire playlist? (y/n)")
+                        ans = input()
+                        if ans.lower() == "y":
+                            p = Playlist(link_inpt)
+                            for i in p.video_urls:
+                                links.append("a_"+i)
+                    else:
                         p = Playlist(link_inpt)
                         for i in p.video_urls:
                             links.append("a_"+i)
                 else:
-                    if cfg_everywhere == True:
+                    if config.cfg_everywhere == True:
                         links.append("a_"+link_inpt)
                     else:
                         links.append("m_"+link_inpt)
         await asyncio.sleep(0.2)
     
-async def vid():
+async def vid(config:Config):
     global vids, links
     #just for testing
     while True:
         if len(links) > 0:
             mode = links[0][:1]
             url = links[0][2:]
-            if debug:
+            if config.debug:
                 print(links[0])
             if mode == "m":
                 vids.append(Video(url, None,None))
-                if debug:
+                if config.debug:
                     print("downloading manaual")
             elif mode == "a":
-                vids.append(Video(url, cfg_abr, cfg_resolution))
-                if debug:
+                vids.append(Video(url, config.cfg_abr, config.cfg_resolution))
+                if config.debug:
                     print("downloading automatic")
-            if debug:
+            if config.debug:
                 print(vids)
                 print(links)
             links.pop(0)
 
         await asyncio.sleep(0.1)
 
-async def run():
+async def run(config:Config):
     while True:
         if len(vids) > 0:
-            if debug:
+            if config.debug:
                 print("running")
-            await vids[0].download()
-            await vids[0].convert()
-            await vids[0].merge()
+            await vids[0].download(config=config)
+            await vids[0].convert(config=config)
+            await vids[0].merge(config=config)
             vids.pop(0)
             print("done")
-            if debug:
+            if config.debug:
                 print(links)
                 print(vids)
         
         await asyncio.sleep(0.2)
 
 loop = asyncio.get_event_loop()
-loop.create_task(link())
-loop.create_task(vid())
-loop.create_task(run())
+loop.create_task(link(config=config_object))
+loop.create_task(vid(config=config_object))
+loop.create_task(run(config=config_object))
 loop.run_forever()

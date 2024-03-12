@@ -11,11 +11,15 @@ abr = 0
 #only for links/playlist mode
 
 [misc]
-config_everywhere = False
+config_everywhere = True
 #if config everywhere is set to true, the settings above 
 #will be applied to every video, so way less manual input is reqired
 reset = False
 #set this to true to reset everything when executing the program the next time
 debug = False
 #set this to true to show debug information, when running the script
+mode = simple
+#possible modes: simple, music, video
+autodownload_playlists = False
+#automatically confirm, that you want to download the entire playlist
 
