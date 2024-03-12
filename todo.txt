@@ -1,6 +1,6 @@
 Todo:
 
-config als Objekt
+extra robustness, especially when dealing with user input
 
 simple mode:
     -playlist download

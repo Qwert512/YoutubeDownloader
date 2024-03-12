@@ -1,8 +1,8 @@
 #made by Qwert512 on github
-#version: 1.2.2
+#version: 1.2.3
 from pytube import YouTube, Playlist
 import os, shutil, configparser, asyncio
-import create_config, util
+import create_config, util, split_mp3
 import warnings
 from moviepy.editor import VideoFileClip, AudioFileClip
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -11,30 +11,6 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 tmp_dir = './Downloads_tmp/' 
 download_dir = './Downloads/'
-
-def config():
-    global cfg_resolution
-    global cfg_abr
-    global cfg_everywhere
-    global debug
-    global autodownload_playlists
-    global mode
-
-    # config = configparser.ConfigParser()
-    # config.read('config.txt')
-
-    # debug_str = config["misc"]["debug"]
-    # debug = {'true': True, 'false': False}.get(debug_str.lower(), False)
-    # cfg_resolution = int(config['video']['resolution'])
-    # cfg_abr = int(config['audio']['abr'])
-    # cfg_everywhere_str = config["misc"]["config_everywhere"]
-    # cfg_everywhere = {'true': True, 'false': False}.get(cfg_everywhere_str.lower(), False)
-    # autodownload_playlists_str = config["misc"]["autodownload_playlists"]
-    # autodownload_playlists = {'true': True, 'false': False}.get(autodownload_playlists_str.lower(), False)
-    # mode = config["misc"]["mode"]
-    # if mode not in ["simple", "music", "video"]:
-    #     mode = "simple"
-    pass
 
 
 class Config:
@@ -339,6 +315,17 @@ class Video:
 
         if config.debug:
             print("Merging completed.")
+
+        if config.mode == "music":
+            input_mp3 = self.aud_name
+            timestamps = split_mp3.formt_timestamps(self.yt,input_mp3)
+            if len(timestamps) != 0:
+                print(f"Possible album with {len(timestamps)} tracks detected. Do you want to split the album into individual tracks? (y/n)")
+                ans = input()
+                if ans.lower() == "y":
+                    print("Splitting album...")
+                    split_mp3.export_subclips(input_mp3=input_mp3,sub_files_info=timestamps)
+                    print("done")
 
 create_config.create_config()
 config_object = Config()
