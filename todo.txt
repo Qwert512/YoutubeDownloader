@@ -18,4 +18,9 @@ advanced mode:
 mp3 split:
     -video compatibility
     -settings and stuff
-    -integrate
+    -comment scraper
+    -fanyier description scraper
+
+Album playlist downloader
+
+option to move playlists to seperate folder
