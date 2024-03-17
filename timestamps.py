@@ -95,20 +95,28 @@ def scrape_comments(video_id:str,api_key:str):
 
 def extract_timestamps_comment(comment_text:str):
     # Regular expressions to extract timestamp and description
-    pattern1_matches = re.findall(r'<a.*?>(.*?)</a>\s*(.*?)<br>', comment_text)
-    pattern2_matches = re.findall(r'(\d+.*?)<a.*?>(.*?)</a>', comment_text)
-    r'(\d+:\d+(?::\d+)?)</a>\s*(.*?)<br>'
+    pattern1_matches = re.findall(r'<a.*?>(.*?)</a>\s*(.*?)(?:<br>|$)', comment_text)
+    pattern2_matches = re.findall(r'([^<]*?)<a.*?>(.*?)</a>(?:<br>|$)', comment_text)
+
     print("pattern_1: "+str(len(pattern1_matches))+", pattern_2: "+str(len(pattern2_matches)))
     # Determine which pattern produces more matches
     if len(pattern1_matches) != len(pattern2_matches):
         best_matches = pattern1_matches if len(pattern1_matches) > len(pattern2_matches) else pattern2_matches
         flip_tuple = False if best_matches == pattern1_matches else True
+        if best_matches == pattern1_matches:
+            print("Choosing pattern 1")
+        else:
+            print("Choosing pattern 2")
     elif len(pattern1_matches) != 0:
         # If lengths are equal and not 0, compare the first element of the tuple
         pattern1_length = len(pattern1_matches[0][0]) + len(pattern1_matches[0][1])
         pattern2_length = len(pattern2_matches[0][0]) + len(pattern2_matches[0][1])
         best_matches = pattern1_matches if pattern1_length >= pattern2_length else pattern2_matches
         flip_tuple = False if best_matches == pattern1_matches else True
+        if best_matches == pattern1_matches:
+            print("Choosing pattern 1")
+        else:
+            print("Choosing pattern 2")
     else:
         # If both lengths are 0, return an empty list
         return []
