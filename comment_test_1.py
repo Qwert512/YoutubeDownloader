@@ -1,6 +1,6 @@
 from googleapiclient.discovery import build
 #credentials 
-video_id= "MCJ5A_0iq08"
+video_id= "5JOaTtcg1tE"
 api_key = "AIzaSyAzkLcbTqYfW8KHY5lZQlVdPeCzI4D8xIc"
 
 def scrape_comments(video_id:str,api_key:str):
@@ -33,4 +33,3 @@ def scrape_comments(video_id:str,api_key:str):
         print("================================\n")
     return(possible_setlists)
 
-scrape_comments(video_id=video_id,api_key=api_key)

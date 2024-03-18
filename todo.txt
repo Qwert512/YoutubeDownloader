@@ -20,6 +20,7 @@ mp3 split:
     -settings and stuff
     -comment scraper
     -fanyier description scraper
+    -pattern 2 choosing some random ass text and it being preferred
 
 Album playlist downloader
 

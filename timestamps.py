@@ -29,7 +29,7 @@ def timestamp_to_secs(timestamp: str) -> int:
         return 0
 
 def remove_prefix(x):
-    filter_characters = "-_: "
+    filter_characters = "-_: .1234567890"
     # Define the regex pattern to find the first character not in filter_characters
     pattern = r'[^' + re.escape(filter_characters) + ']'
 
@@ -37,32 +37,82 @@ def remove_prefix(x):
     match = re.search(pattern, x)
     if match:
         index = match.start()
-        return x[index:]
+        return x[index:].strip()
     else:
-        return x  # No characters found that aren't in filter_characters
+        return x.strip()  # No characters found that aren't in filter_characters
+    
 
 def format_timestamps(timestamps_with_description:tuple,url: str, input_mp3: str="Null"):
+    #converting the tuple to two lists to work on
+    timestamps = []
+    descriptions = []
+    for n in timestamps_with_description:
+        timestamps.append(n[0])
+        descriptions.append(n[1])
+    #getting legth of the video
     video = YouTube(url)
     timestamps_with_duration = []
     if input_mp3 == "Null":
         length_secs = video.length
+        #if the precise length inst availible, just get a close estimate
     else:
         audio_clip = AudioFileClip(input_mp3)
         length_secs = audio_clip.duration
+    #the length isused for the last timestamp
 
+    #First we convert every timestamp into a nice, cleaned HH:MM:SS Timestamp
+    converted_timestamps = []
+    for timestamp in timestamps:
+        try:
+        # Split the timestamp into minutes and seconds (optional hours)
+            parts = timestamp.split(':')
+
+            # Handle different formats (M:SS or MM:SS)
+            if len(parts) == 2:  
+                hours = '00'
+                minutes, seconds = parts
+            elif len(parts) == 3:  
+                hours, minutes, seconds = parts
+            else:
+                raise ValueError(f"Invalid timestamp format: {timestamp}")
+
+            # Zero-pad minutes and seconds if needed
+            minutes = minutes.zfill(2)
+            seconds = seconds.zfill(2)
+            hours = hours.zfill(2)
+
+            # Combine and return converted timestamp
+            converted_timestamps.append(f"{hours}:{minutes}:{seconds}")
+        except ValueError as e:
+            print(f"Error converting timestamp: {timestamp} - {e}")
+
+    timestamps = converted_timestamps
+    #now the list contains timestamps in a uniform format
+
+    #next step are the comments
+    converted_descriptions = []
+    patterns_to_remove = ["()","<br>","&#39;"]
+    for k in descriptions:
+        k = remove_prefix(k)
+        for pattern in patterns_to_remove:
+            k = k.replace(pattern,"")
+        converted_descriptions.append(k.strip())
+    descriptions = converted_descriptions
+
+    # for i in range(len(timestamps_with_description)):
+    #     timestamp = timestamps_with_description[i][0]
+    #     description = timestamps_with_description[i][1]
+    #     if i == len(timestamps_with_description)-1:
+    #         next_timestamp_secs = length_secs
+    #     else:
+    #         next_timestamp = timestamps_with_description[i+1][0]
+    #         next_timestamp_secs = timestamp_to_secs(timestamp=next_timestamp)
+    #     timestamp_secs = timestamp_to_secs(timestamp=timestamp)
+    #     duration_timestamp = float(next_timestamp_secs)-float(timestamp_secs)
+    #     timestamps_with_duration.append((str(timestamp),str(description),str(duration_timestamp),str(timestamp_secs)))
     
-    for i in range(len(timestamps_with_description)):
-        timestamp = timestamps_with_description[i][0]
-        description = timestamps_with_description[i][1]
-        if i == len(timestamps_with_description)-1:
-            next_timestamp_secs = length_secs
-        else:
-            next_timestamp = timestamps_with_description[i+1][0]
-            next_timestamp_secs = timestamp_to_secs(timestamp=next_timestamp)
-        timestamp_secs = timestamp_to_secs(timestamp=timestamp)
-        duration_timestamp = float(next_timestamp_secs)-float(timestamp_secs)
-        timestamps_with_duration.append((str(timestamp),str(description),str(duration_timestamp),str(timestamp_secs)))
-    
+    for i in range(len(timestamps)):
+        timestamps_with_duration.append((timestamps[i],descriptions[i]))
     return(timestamps_with_duration)
 
 
@@ -125,7 +175,7 @@ def scrape_comments(video_id:str,api_key:str):
 def extract_timestamps_comment(comment_text:str):
     # Regular expressions to extract timestamp and description
     pattern1_matches = re.findall(r'<a.*?>(.*?)</a>\s*(.*?)(?:<br>|$)', comment_text)
-    pattern2_matches = re.findall(r'([^<]*?)<a.*?>(.*?)</a>(?:<br>|$)', comment_text)
+    pattern2_matches = re.findall(r'(.*?)<a.*?>(.*?)</a>\s*(?:<br>)?', comment_text)
 
     print("pattern_1: "+str(len(pattern1_matches))+", pattern_2: "+str(len(pattern2_matches)))
     # Determine which pattern produces more matches
@@ -173,3 +223,32 @@ def url_to_id(url:str) -> str:
             return match.group(1)
     
     return "None"
+
+def export_subclips(input_mp3:str,sub_files_info:list):
+
+    # Define the start times, durations, and titles for the sub-MP3 files
+    # Format: (timestamp, title, duration, start_time)
+
+    # Iterate through sub_files_info and export each sub-MP3 file
+    name = input_mp3.replace('./Downloads/','')
+    name = name.replace('.mp3','')
+    try:
+        os.mkdir(".\\Downloads\\"+name)
+    except:
+        pass
+    for idx, (x,title, duration, start_time) in enumerate(sub_files_info, start=1):
+        duration = float(duration)
+        start_time = float(start_time)
+        
+        
+        # Create a subclip from the original MP3 file
+        subclip = AudioFileClip(input_mp3).subclip(start_time, start_time + duration)
+        
+        # Define the filename for the sub-MP3 file
+        if title != None and title != "":
+            output_mp3 = f"./Downloads/{name}/{title}.mp3"
+        else:
+            output_mp3 = f"./Downloads/{name}/Track_{str(idx)}.mp3"
+        
+        # Export the sub-MP3 file with the specified title
+        subclip.write_audiofile(output_mp3,codec='mp3' ,verbose=False)

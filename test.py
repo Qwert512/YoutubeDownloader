@@ -14,17 +14,15 @@ for id in lines:
         #check description
         timestamps_description = timestamps.extract_timestamps_description(url="https://www.youtube.com/watch?v="+video_id)
         if len(timestamps_description) == 0:
-            print("No timestamps found in description")
+            comments = timestamps.scrape_comments(video_id=video_id,api_key=api_key)
+            if len(comments) == 0:
+                print("No timestamps found")
+            else:
+                setlist = timestamps.extract_timestamps_comment(comment_text=comments[0])
+                print(timestamps.format_timestamps(setlist,"https://www.youtube.com/watch?v="+video_id))
         else:
-            print(timestamps_description)
+            print(timestamps.format_timestamps(timestamps_description,"https://www.youtube.com/watch?v="+video_id))
 
 
-        comments = timestamps.scrape_comments(video_id=video_id,api_key=api_key)
-        if len(comments) == 0:
-            print("No timestamps found in comments")
-        else:
-            setlist = timestamps.extract_timestamps_comment(comment_text=comments[0])
-            print("Comment timestamps from "+id+": \n")
-            print(comments[0]+"\n")
-            print(setlist)
+        
     print("\n")

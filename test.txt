@@ -1,10 +1,10 @@
 DqQr64kZzAM - desc - works
 JqJ9kcxtOxY - comm - works
-bU_CrTrZDnY - desc - doenst work
+bU_CrTrZDnY - desc - works
 95yDCIVtzDU - comm - works
 y8UwLz69D4k - comm - works
-OG0ncc2Cx2M - desc - doenst work - comm - works
-HSGrU5oWuyA - desc - doenst work
+OG0ncc2Cx2M - desc - works - comm - works
+HSGrU5oWuyA - desc - works
 5JOaTtcg1tE - comm - works
-mXHaFRyAn7c - comm - works
+mXHaFRyAn7c - comm - doenst work
 X1FK1BxuPzM - comm - works

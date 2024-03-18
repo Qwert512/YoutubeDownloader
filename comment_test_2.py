@@ -1,50 +1,17 @@
 import re
+from timestamps import scrape_comments
+video_id= "5JOaTtcg1tE"
+api_key = "AIzaSyAzkLcbTqYfW8KHY5lZQlVdPeCzI4D8xIc"
 
 def extract_timestamps_and_descriptions(text):
-  pattern1_matches = re.findall(r'(\d+:\d+(?::\d+)?)\s*(.*)', text)
-
-  timestamp_text_tuples = []
-  timestamps = []
-  content = []
-  for match in pattern1_matches:
-    timestamp_text_tuples.append((match[0], match[1]))
-    timestamps.append(match[0])
-
-  all_lines = str.splitlines(text)
-  for i in all_lines:
-     for u in timestamps:
-        if u in i:
-           content.append(i.replace(u,""))
-           break
-  
-  timestamp_text_tuples = []
-
-  for n in range(len(timestamps)):
-     timestamp_text_tuples.append((timestamps[n],content[n].replace("#","")))
-
-  return timestamp_text_tuples
-  # Skip header lines (assuming lines before "Tracklist:")
-
-# Test the function with sample text
+  pattern2_matches = re.findall(r'(.*?)<a.*?>(.*?)</a>\s*(?:<br>)?', text)
+  return(pattern2_matches)
 
 
-text_1 = """
-Stick Figure / Set in Stone (Full Album)\n\nTracklist:\n01. Fire on the Horizon   0:05 - 5:34\n02. In this Love    5:34 - 9:49\n03. Sound of the Sea    9:49 - 15:16\n04. Choice is yours    15:16 - 20:23\n05. Mind Block    20:23 - 24:41\n06. Sentenced    24:41 - 28:55\n07. Out the Door    28:55 - 33:31\n08. Weary Eyes    33:31 - 37:14\n09. Smokin` Love    37:14 - 40:50\n10. Shadow    40:50 - 44:43\n11. One of those Days    44:43 - 49:05\n12. All my Love    49:05 - 53:21\n13. Sunshine and Rain    53:21 - 55:50\n14. Smiles on Faces    55:50 - 1:00:08\n\nBuy the album on iTunes - https://itunes.apple.com/us/album/set-in-stone/id1045767173 \nBuy / listen to the album on Bandcamp - https://stickfigure.bandcamp.com/\nFollow Stick Figure online\nhttp://www.stickfiguremusic.com/\nhttps://www.facebook.com/stickfiguremusic
-"""
-text_2 = """
-Stick Figure – Wisdom (Full Album)\nNew album 'Wisdom' - https://ineffable.to/WISDOM \n\n00:00:00 - Old Sunrise\n00:05:22 - Paradise\n00:09:32 - Way of Life (feat. Slightly Stoopid)\n00:13:46 - Edge of the Ocean\n00:18:42 - Stepping Stones\n00:22:55 - Fall into the Sun\n00:27:12 - Showdown (feat. Collie Buddz)\n00:31:37 - Soul of the World (feat. Barrington Levy)\n00:35:07 - Smoke Signals\n00:39:31 - Here Comes the Sound\n00:42:57 - Sound System\n00:46:25 - Satisfaction Feeling\n00:50:43 - Higher (feat. Slightly Stoopid)\n00:54:58 - Falling Stars\n\nSacred Sands Summer Tour 2024: \n7/11 - Albuquerque, NM - https://6xxb.short.gy/stickalbuquerque \n7/13 - San Diego, CA - https://6xxb.short.gy/sticksandiego1\n7/14 - San Diego, CA - https://6xxb.short.gy/sticksandiego2\n7/16 - Los Angeles, CA - https://6xxb.short.gy/sticklosangeles\n7/18 - Bend, OR - https://6xxb.short.gy/stickbend \n7/20 - Tacoma, WA - https://6xxb.short.gy/sticktacoma \n7/24 - Morrison, CO - https://6xxb.short.gy/stickredrocks1\n7/25 - Morrison, CO - https://6xxb.short.gy/stickredrocks2 \n7/27 - Colorado TBA \n7/30 - Chicago, IL - https://6xxb.short.gy/stickchicago \n8/1 - Thornville, OH - https://6xxb.short.gy/stickeverwild \n8/3 - Mansfield, MA - https://6xxb.short.gy/stickmansfield \n8/6 - Virginia Beach, VA - https://6xxb.short.gy/stickvirginiabeach \n8/8 - Charleston, SC - https://6xxb.short.gy/stickcharleston \n8/10 - West Palm Beach, FL - https://6xxb.short.gy/stickwestpalmbeach \n8/12 - Key West, FL - https://6xxb.short.gy/stickkeywest\n\nhttp://www.stickfigure.com\r\nhttps://www.facebook.com/stickfiguremusic\r\nhttp://www.twitter.com/StickFigureDub\r\nhttp://www.soundcloud.com/stickfigure\r\nhttps://www.instagram.com/stickfiguremusic
-"""
-text_3 = """
-Sticky Fingers website : https://stickyfingerstheband.com/\nSticky Fingers merch : https://sticky-fingers-uk.myshopify.com/\n\nTracklist\n1. How To Fly (0:00)\n2. These Girls (3:11)\n3. Lazerhead (6:32)\n4. Velvet Skies ft. Lyall Moloney (12:24)\n5. Australia Street (17:14)\n6. Gold Snafu (20:50)\n7. Bootleg Rascal (24:30)\n8. Caress Your Soul (28:14)\n9. Another Episode (31:04)\n10. Liquorlip Loaded Gun (35:58)\n11. Cool & Calm (41:07)\n12. Rum Rage (44:24) \n13. Sunsick Moon (48:33)\n14. Change (52:07)\n15. Cyclone (56:24)\n\n\nFollow Sticky Fingers\nhttps://www.facebook.com/stickyfingersmusic\nhttps://www.instagram.com/stickyfingersband/\nhttps://www.youtube.com/channel/UCRC74iukYTRgzOZhlQq1f7A\n\nWe don't own the rights of the uploaded songs, contact us if you want us to delete a video\nrascalmusic1995@gmail.com
-"""
-text_4="""
-KBong - 'Easy To Love You' Full Album 🌠\nShop KBong Merch ➡️ https://kbongmerch.myshopify.com/\n\n1. Easy To Love You (feat. The Movement) 0:00\n2. Good Lovin 4:15\n3. Middle Of The Ocean (feat. Stic
-k Figure) 8:23\n4. Heavy As Gold 12:52\n5. Music And The Message 17:01\n6. Long Distance Lover 22:00\n7. Need A Ride 26:24\n8. Travelin On 31:01\n9. Open My Eyes 36:39\n10. Lovelight 41:19\n11. One More Song (feat. Johnny Cosmic) 45:34\n12. Awake (feat. Raging Fyah) 50:06\n\nMerch, Tour Dates + More\nhttps://kbongmusic.com\n\nKBong Social Links\nhttps://facebook.com/kbongmusic\nhttp://twitter.com/kbongmusic\nhttp://youtube.com/kbongmusic\nhttps://instagram.com/kbongmusic\n\nProduced By : Johnny Cosmic\n#KBong #EasyToLoveYou
-"""
 
-examples = [text_1,text_2,text_3,text_4]
-for i in examples:
-    i = i.replace("\n","#\n")
-    extracted_data = extract_timestamps_and_descriptions(i)
-    print(extracted_data)
-    print("\n")
+comment = scrape_comments(video_id=video_id,api_key=api_key)[0]
+extracted_data = extract_timestamps_and_descriptions(comment)
+print(extracted_data)
+print("\n")
+
+# Example comment: '1. Demons ', '00:00</a>\r<br>2. Believer <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=172">02:52</a>\r<br>3. Natural <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=376">06:16</a>\r<br>4. Thunder <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=565">09:25</a>\r<br>5. Bad liar <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=753">12:33</a>\r<br>6. Whatever it takes <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=1014">16:54</a>\r<br>7. Birds <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=1215">20:15</a>\r<br>8. Radioactive <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=1434">23:54</a>\r<br>9. Zero <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=1713">28:33</a>\r<br>10. Warriors <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=1923">32:03</a>\r<br>11. Machine <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=2093">34:53</a>\r<br>12. I&#39;m so sorry <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=2296">38:16</a>\r<br>13. Monster <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=2506">41:46</a>\r<br>14. West Coast <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=2756">45:56</a>\r<br>15. Love <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=2974">49:34</a>\r<br>16. Bullet in a gun <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=3140">52:20</a>\r<br>17. Only <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=3345">55:45</a>\r<br>18. Dream <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=3526">58:46</a>\r<br>19. Real Life <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=3785">01:03:05</a>\r<br>20. Walking the Wire <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=4032">01:07:12</a>\r<br>21. Next to me <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=4275">01:11:15</a>\r<br>22. Battle Cry <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=4496">01:14:56</a>\r<br>23. Follow you <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=4767">01:19:27</a>\r<br>24. Rise up <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=4943">01:22:23</a>\r<br>25. Burn out <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=5175">01:26:15</a>\r<br>26. Roots <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=5449">01:30:49</a>\r<br>27. Digital <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=5623">01:33:43</a>\r<br>28. Gold <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=5824">01:37:04</a>\r<br>29. Stuck <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=6041">01:40:41</a>\r<br>30. I don&#39;t know why <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=6232">01:43:52</a>\r<br>31. Ready Aim fire <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=6425">01:47:05</a>\r<br>32. Enemy <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=6665">01:51:05</a>\r<br>33. I bet my life <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=6834">01:53:54</a>\r<br>34. Bones <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=7028">01:57:08</a>\r<br>35. On the of the World <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=7193">01:59:53</a>\r<br>36. Who we are <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=7383">02:03:03</a>\r<br>37. Bleeding out <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=7632">02:07:12</a>\r<br>38. Not today <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=7852">02:10:52</a>\r<br>39. Hear me <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=8114">02:15:14</a>\r<br>40. Friction <a href="https://www.youtube.com/watch?v=5JOaTtcg1tE&amp;t=8345">02:19:05'
