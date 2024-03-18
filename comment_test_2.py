@@ -1,27 +1,29 @@
 import re
 
 def extract_timestamps_and_descriptions(text):
-  """Extracts timestamps (start time) and descriptions from tracklist lines.
+  pattern1_matches = re.findall(r'(\d+:\d+(?::\d+)?)\s*(.*)', text)
 
-  Args:
-      text: The text containing the tracklist.
+  timestamp_text_tuples = []
+  timestamps = []
+  content = []
+  for match in pattern1_matches:
+    timestamp_text_tuples.append((match[0], match[1]))
+    timestamps.append(match[0])
 
-  Returns:
-      A list of tuples containing (timestamp, description) pairs.
-  """
-  timestamps_and_descriptions = []
-  pattern = r"\b(?P<description>.*?) \- (?P<timestamp>\d+:\d{2})"  # Capture description and start time
+  all_lines = str.splitlines(text)
+  for i in all_lines:
+     for u in timestamps:
+        if u in i:
+           content.append(i.replace(u,""))
+           break
+  
+  timestamp_text_tuples = []
 
+  for n in range(len(timestamps)):
+     timestamp_text_tuples.append((timestamps[n],content[n].replace("#","")))
+
+  return timestamp_text_tuples
   # Skip header lines (assuming lines before "Tracklist:")
-  for line in text.splitlines()[text.lower().find("tracklist:"):]:
-    match = re.search(pattern, line)
-    if match:
-      description = match.group("description").strip()  # Extract and strip description
-      timestamp = match.group("timestamp")  # Extract start time
-      timestamps_and_descriptions.append((timestamp, description))
-
-  return timestamps_and_descriptions
-
 
 # Test the function with sample text
 
@@ -42,6 +44,7 @@ k Figure) 8:23\n4. Heavy As Gold 12:52\n5. Music And The Message 17:01\n6. Long 
 
 examples = [text_1,text_2,text_3,text_4]
 for i in examples:
+    i = i.replace("\n","#\n")
     extracted_data = extract_timestamps_and_descriptions(i)
     print(extracted_data)
     print("\n")

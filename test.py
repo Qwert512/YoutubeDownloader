@@ -1,6 +1,5 @@
 import timestamps
 api_key = "AIzaSyAzkLcbTqYfW8KHY5lZQlVdPeCzI4D8xIc"
-#url = "https://www.youtube.com/watch?v=9dCZ-9StrlU"
 with open("video_examples.txt","r") as file:
     lines = file.readlines()
 
@@ -13,7 +12,7 @@ for id in lines:
         video_id= id
 
         #check description
-        timestamps_description = timestamps.formt_timestamps(url="https://www.youtube.com/watch?v="+video_id)
+        timestamps_description = timestamps.extract_timestamps_description(url="https://www.youtube.com/watch?v="+video_id)
         if len(timestamps_description) == 0:
             print("No timestamps found in description")
         else:

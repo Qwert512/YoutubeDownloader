@@ -2,6 +2,7 @@ import re, os
 from json import loads
 from pytube import YouTube
 from googleapiclient.discovery import build
+from moviepy.editor import AudioFileClip
 
 def get_description(video: YouTube) -> str:
     i: int = video.watch_html.find('"shortDescription":"')
@@ -40,15 +41,16 @@ def remove_prefix(x):
     else:
         return x  # No characters found that aren't in filter_characters
 
-def formt_timestamps(url: str, input_mp3: str=None) -> list:
+def format_timestamps(timestamps_with_description:tuple,url: str, input_mp3: str="Null"):
     video = YouTube(url)
-    desc = get_description(video)
-    #audio_clip = AudioFileClip(input_mp3)
-    #length_secs = audio_clip.duration
-    length_secs = video.length
-    timestamps_with_description = re.findall(r'(\d+:\d+(?::\d+)?)\s*(.*)', desc)
     timestamps_with_duration = []
+    if input_mp3 == "Null":
+        length_secs = video.length
+    else:
+        audio_clip = AudioFileClip(input_mp3)
+        length_secs = audio_clip.duration
 
+    
     for i in range(len(timestamps_with_description)):
         timestamp = timestamps_with_description[i][0]
         description = timestamps_with_description[i][1]
@@ -62,6 +64,33 @@ def formt_timestamps(url: str, input_mp3: str=None) -> list:
         timestamps_with_duration.append((str(timestamp),str(description),str(duration_timestamp),str(timestamp_secs)))
     
     return(timestamps_with_duration)
+
+
+def extract_timestamps_description(url:str):
+    video = YouTube(url)
+    desc = get_description(video)
+    pattern1_matches = re.findall(r'(\d+:\d+(?::\d+)?)\s*(.*)', desc)
+
+    timestamp_text_tuples = []
+    timestamps = []
+    content = []
+    for match in pattern1_matches:
+        timestamp_text_tuples.append((match[0], match[1]))
+        timestamps.append(match[0])
+
+    all_lines = str.splitlines(desc)
+    for i in all_lines:
+        found_timestamp = False
+        for u in timestamps:
+            if u in i:
+                content.append(i.replace(u, ""))
+                break
+    
+    timestamp_text_tuples = []
+    for n in range(len(timestamps)):
+        timestamp_text_tuples.append((timestamps[n],content[n].replace("#","")))
+
+    return timestamp_text_tuples
 
 def scrape_comments(video_id:str,api_key:str):
     #build a resource for youtube
@@ -143,4 +172,4 @@ def url_to_id(url:str) -> str:
         if match:
             return match.group(1)
     
-    return None
+    return "None"
