@@ -1,8 +1,8 @@
 #made by Qwert512 on github
-#version: 1.2.3
+#version: 1.3.0
 from pytube import YouTube, Playlist
 import os, shutil, configparser, asyncio
-import create_config, util, split_mp3
+import create_config, util, timestamps
 import warnings
 from moviepy.editor import VideoFileClip, AudioFileClip
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -27,6 +27,7 @@ class Config:
         autodownload_playlists_str = config_file["misc"]["autodownload_playlists"]
         self.autodownload_playlists = {'true': True, 'false': False}.get(autodownload_playlists_str.lower(), False)
         self.mode = config_file["misc"]["mode"]
+        self.api_key = "Null"
         if self.mode not in ["simple", "music", "video"]:
             self.mode = "simple"
 
@@ -318,13 +319,21 @@ class Video:
 
         if config.mode == "music":
             input_mp3 = self.aud_name
-            timestamps = split_mp3.formt_timestamps(self.yt,input_mp3)
-            if len(timestamps) != 0:
-                print(f"Possible album with {len(timestamps)} tracks detected. Do you want to split the album into individual tracks? (y/n)")
+            video_id = self.yt.video_id 
+
+            #check description
+            timestamps_tuple = timestamps.extract_timestamps_description(url="https://www.youtube.com/watch?v="+video_id)
+            if len(timestamps_tuple) == 0:
+                comments = timestamps.scrape_comments(video_id=video_id,api_key=config.api_key)
+                if len(comments) != 0:
+                    timestamps_tuple = timestamps.extract_timestamps_comment(comment_text=comments[0])
+            if len(timestamps_tuple) != 0:
+                timestamps_tuple = timestamps.format_timestamps(timestamps_tuple,"https://www.youtube.com/watch?v="+video_id,input_mp3=input_mp3) # type: ignore
+                print(f"Possible album with {len(timestamps_tuple)} tracks detected. Do you want to split the album into individual tracks? (y/n)")
                 ans = input()
                 if ans.lower() == "y":
                     print("Splitting album...")
-                    split_mp3.export_subclips(input_mp3=input_mp3,sub_files_info=timestamps)
+                    timestamps.export_subclips(input_mp3=input_mp3,sub_files_info=timestamps_tuple)
                     print("done")
 
 create_config.create_config()

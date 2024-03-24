@@ -17,7 +17,7 @@ def create_config():
             #if reset is wanted or the file is empty, delete it so a clean one will be made
             os.remove("config.txt")
     except:
-        KeyError
+        pass
 
     if os.path.exists("config.txt") == False:
         #if no config file is present, create one!
@@ -29,7 +29,7 @@ def create_config():
         config.set('video', '#only for links/playlist mode')
 
         config.add_section('audio')
-        config.set('audio', 'abr', '0')
+        config.set('audio', 'abr', '10')
         config.set('audio', '#audio bitrate (abr): 1 = 48kbps, 2 = 50kbps, 3 = 70kbps, 4 = 128kbps, ')
         config.set('audio', '#5 = 160kbps, 10 = max quality')
         config.set('audio', '#only for links/playlist mode')
