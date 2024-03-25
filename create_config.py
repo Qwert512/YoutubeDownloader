@@ -35,6 +35,9 @@ def create_config():
         config.set('audio', '#only for links/playlist mode')
 
         config.add_section('misc')
+        config.set('misc', 'api_key', 'Null')
+        config.set('misc', '#google api key used for Youtube v3 api. Used for fetching song')
+        config.set('misc', '#timestamps from comments for the "autosplit albums" feature')
         config.set('misc', 'config_everywhere', 'False')
         config.set('misc', '#if config everywhere is set to true, the settings above ')
         config.set('misc', '#will be applied to every video, so way less manual input is reqired')
@@ -46,9 +49,13 @@ def create_config():
         config.set('misc', '#possible modes: simple, music, video')
         config.set('misc', 'autodownload_playlists', 'False')
         config.set('misc', '#automatically confirm, that you want to download the entire playlist')
+        config.set('misc', 'autoconfirm_split_album', 'False')
+        config.set('misc', '#automatically confirm, that you want to split an album into subtracks')
+        config.set('misc', 'download_playlist_subfolder', 'False')
+        config.set('misc', '#When downloading a playlist, create a subfolder in "Downloads" and move the subclips there')
 
         
         with open("config.txt","w") as file:
             config.write(file)
-#if __name__ == "__main__":
-#schaut ob ichs ausführe
+if __name__ == "__main__":
+    create_config()

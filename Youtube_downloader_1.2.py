@@ -27,7 +27,11 @@ class Config:
         autodownload_playlists_str = config_file["misc"]["autodownload_playlists"]
         self.autodownload_playlists = {'true': True, 'false': False}.get(autodownload_playlists_str.lower(), False)
         self.mode = config_file["misc"]["mode"]
-        self.api_key = "Null"
+        self.api_key = config_file["misc"]["api_key"]
+        autoconfirm_split_album = config_file["misc"]["autoconfirm_split_album"]
+        self.autosplit_album = {'true': True, 'false': False}.get(autoconfirm_split_album.lower(), False)
+        download_playlist_subfolder_str = config_file["misc"]["download_playlist_subfolder"]
+        self.download_playlist_subfolder = {'true': True, 'false': False}.get(download_playlist_subfolder_str.lower(), False)
         if self.mode not in ["simple", "music", "video"]:
             self.mode = "simple"
 
@@ -56,7 +60,7 @@ class Video:
     download_dir = './Downloads/'
     file_dir = os.path.realpath(__file__)[:-len(os.path.basename(__file__))][:-1]
 
-    def __init__(self, link:str, abr, resolution):
+    def __init__(self, link:str, abr, resolution, download_path:str="Null"):
         self.link = link
         self.abr = abr
         self.resolution = resolution
@@ -323,18 +327,29 @@ class Video:
 
             #check description
             timestamps_tuple = timestamps.extract_timestamps_description(url="https://www.youtube.com/watch?v="+video_id)
-            if len(timestamps_tuple) == 0:
+            if len(timestamps_tuple) == 0 and config.api_key != "Null":
                 comments = timestamps.scrape_comments(video_id=video_id,api_key=config.api_key)
                 if len(comments) != 0:
                     timestamps_tuple = timestamps.extract_timestamps_comment(comment_text=comments[0])
             if len(timestamps_tuple) != 0:
                 timestamps_tuple = timestamps.format_timestamps(timestamps_tuple,"https://www.youtube.com/watch?v="+video_id,input_mp3=input_mp3) # type: ignore
-                print(f"Possible album with {len(timestamps_tuple)} tracks detected. Do you want to split the album into individual tracks? (y/n)")
-                ans = input()
-                if ans.lower() == "y":
+                if config.autosplit_album != True:
+                    print(f"Possible album with {len(timestamps_tuple)} tracks detected. Do you want to split the album into individual tracks? (y/n)")
+                    ans = input()
+                    if ans.lower() == "y":
+                        print("Splitting album...")
+                        timestamps.export_subclips(input_mp3=input_mp3,sub_files_info=timestamps_tuple)
+                        print("done")
+                else:
                     print("Splitting album...")
                     timestamps.export_subclips(input_mp3=input_mp3,sub_files_info=timestamps_tuple)
                     print("done")
+
+class Url:
+
+    def __init__(self, download_mode:str, download_path:str="Null"):
+        self.download_mode = download_mode
+        self.download_path = download_path
 
 create_config.create_config()
 config_object = Config()
