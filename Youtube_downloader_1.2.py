@@ -4,6 +4,7 @@ from pytube import YouTube, Playlist
 import os, shutil, configparser, asyncio
 import create_config, util, timestamps
 import warnings
+from moviepy.video.io import ffmpeg_tools as mp
 from moviepy.editor import VideoFileClip, AudioFileClip
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 #setup routine
@@ -20,8 +21,10 @@ class Config:
 
         debug_str = config_file["misc"]["debug"]
         self.debug = {'true': True, 'false': False}.get(debug_str.lower(), False)
-        self.cfg_resolution = int(config_file['video']['resolution'])
+        #self.cfg_resolution = int(config_file['video']['resolution'])
+        self.cfg_resolution = 7
         self.cfg_abr = int(config_file['audio']['abr'])
+        self.cfg_abr = 10
         cfg_everywhere_str = config_file["misc"]["config_everywhere"]
         self.cfg_everywhere = {'true': True, 'false': False}.get(cfg_everywhere_str.lower(), False)
         autodownload_playlists_str = config_file["misc"]["autodownload_playlists"]
@@ -276,9 +279,9 @@ class Video:
             video_clip = VideoFileClip(v_inname)
             # Write the audio clip to a .mp3 file
             if config.debug:
-                video_clip.write_videofile(v_outname, codec='mp4')
+                video_clip.write_videofile(v_outname, codec='libx264')
             else:
-                video_clip.write_videofile(v_outname, codec='mp4', verbose=False)
+                video_clip.write_videofile(v_outname, codec='libx264', verbose=False)
             os.remove(self.tmp_dir+"v_"+self.cln_vid_name)
         elif(self.vid_type == "mp4" and self.aud_only==False):
             os.rename(v_inname,v_outname)
@@ -297,23 +300,27 @@ class Video:
                 os.remove(self.aud_name)
             os.rename(audio_name,  self.aud_name)
             
-        else:   
+        else: 
+            output_path = self.vid_name
+            if self.vid_type == "mp4":
+                mp.ffmpeg_merge_video_audio(video=video_name,audio=audio_name,output=output_path)
+            else:
             # else:
             #     command = "ffmpeg -i "+self.file_dir+self.tmp_vid_name[1:]+" -i "+self.file_dir+self.tmp_aud_name[1:]+" -c:v copy -c:a copy -hide_banner -loglevel error "+self.file_dir+self.vid_name[1:]
             #     call(command,  shell = True)
-            
-            video_clip = VideoFileClip(video_name)
-            audio_clip = AudioFileClip(audio_name)
+                
+                video_clip = VideoFileClip(video_name)
+                audio_clip = AudioFileClip(audio_name)
 
-            # Set audio for the video clip
-            video_clip = video_clip.set_audio(audio_clip)
+                # Set audio for the video clip
+                video_clip = video_clip.set_audio(audio_clip)
 
-            # Write the merged clip to an output file
-            output_path = self.vid_name
-            if config.debug:
-                video_clip.write_videofile(output_path)
-            else:
-                video_clip.write_videofile(output_path, verbose=False)
+                #Write the merged clip to an output file
+                if config.debug:
+                    video_clip.write_videofile(output_path)
+                else:
+                    video_clip.write_videofile(output_path, verbose=False)
+                
 
             os.remove(video_name)
             os.remove(audio_name)

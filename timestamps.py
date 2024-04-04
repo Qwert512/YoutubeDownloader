@@ -269,4 +269,4 @@ def export_subclips(input_mp3:str,sub_files_info:list):
             output_mp3 = f"./Downloads/{name}/Track_{str(idx)}.mp3"
         
         # Export the sub-MP3 file with the specified title
-        subclip.write_audiofile(output_mp3,codec='mp3' ,verbose=False)
+        subclip.write_audiofile(output_mp3, verbose=False)
