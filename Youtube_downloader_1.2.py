@@ -112,7 +112,7 @@ class Video:
 
         # Ensure the selected resolution index is within bounds
         l = len(resolutions)
-        num = max(0, min(num, l - 1))
+        num = max(0, min(num, l))
         num -= 1
         aud_only = num < 0
         if aud_only and self.abr == None:
